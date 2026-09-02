@@ -10,4 +10,12 @@
 supabase functions deploy reflection-insight
 ```
 
-`reflections` と `analyses` に対する SELECT / INSERT / UPDATE のRLSポリシーが必要です。
+必要なRLS権限:
+
+- `mission_sessions`: SELECT
+- `chat_messages`: SELECT
+- `reflections`: SELECT / INSERT / UPDATE
+- `analyses`: SELECT / INSERT / UPDATE
+
+匿名デモ用ポリシーは本番データと分離してください。本番ではSupabase AuthのJWTと、
+ログインユーザーが対象の子ども・セッションへアクセスできることを検証するポリシーが必要です。

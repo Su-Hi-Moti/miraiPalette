@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import ParentReport from './ParentReport'
 
 const initialMessages = [{ id: 'welcome', role: 'assistant', content: 'こんにちは！きょうのミッションについて、いっしょに考えよう。まず、どんな橋を作ってみたい？' }]
 const demoReplies = ['いい考えだね！どうしてそう思ったの？', 'なるほど。どの部分から試してみたい？', 'おもしろそう！強くするために、どんな形が使えそう？', 'その考えを、小さく試すとしたら何ができるかな？']
 const createMessageId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 function App() {
+  const [view, setView] = useState('child')
   const [messages, setMessages] = useState(initialMessages)
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -48,17 +50,25 @@ function App() {
       setMessages((current) => [...current, { id: createMessageId(), role: 'assistant', content: reply }])
     } catch (sendError) { setError(sendError.message) } finally { setIsSending(false) }
   }
-
+  if (view === 'parent') {
+  return <ParentReport onBack={() => setView('child')} />
+}
   return (
     <main className="app-shell">
       <header className="topbar">
         <a className="brand" href="/" aria-label="ミライパレット ホーム"><span className="brand-mark">M</span><span>ミライパレット</span></a>
         <div className="profile">
+          <button
+ 	 type="button"
+  	  className="parent-report-button"
+  	  onClick={() => setView('parent')}
+	 >
+  	  保護者レポート
+	 </button>
           <span className={`mode-badge ${isDemo ? 'demo' : ''}`}><span className="status-dot" />{isDemo ? 'デモモード' : 'AI接続中'}</span>
           <span className="avatar">た</span><span className="profile-name">デモ太郎</span>
         </div>
       </header>
-
       <section className="mission-strip" aria-label="今日のミッション">
         <div className="mission-icon">橋</div>
         <div><p className="eyebrow">TODAY&apos;S MISSION</p><h1>強い橋を作ろう</h1><p>どうしたら、少ない材料でも強い橋になるかな？</p></div>

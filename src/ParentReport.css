@@ -1,0 +1,131 @@
+.parent-page {
+  min-height: 100vh;
+  padding: 32px clamp(18px, 5vw, 72px) 64px;
+  background: #f5f2e9;
+  color: #27303f;
+}
+
+.parent-header {
+  max-width: 1080px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.parent-header h1 {
+  margin: 4px 0;
+  font-size: 30px;
+}
+
+.parent-header p {
+  margin: 0;
+  color: #6f7680;
+}
+
+.parent-header button {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  background: #2f705c;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.parent-eyebrow {
+  margin: 0 0 6px;
+  color: #2f705c;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.report-card {
+  max-width: 1080px;
+  margin: 0 auto 18px;
+  padding: 24px;
+  border: 1px solid #e2ded2;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 30px rgba(49, 54, 46, 0.07);
+}
+
+.report-card h2,
+.report-card h3 {
+  margin-top: 0;
+}
+
+.report-card p,
+.report-card li {
+  line-height: 1.8;
+}
+
+.report-hero {
+  background: linear-gradient(120deg, #eaf3ed, #ffffff);
+  border-color: #cfe0d5;
+}
+
+.report-grid {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.report-grid .report-card {
+  margin: 0;
+}
+
+.conversation-card {
+  background: #fff7ee;
+  border-color: #f1d7bc;
+}
+
+.conversation-card p {
+  margin: 10px 0;
+  font-weight: 600;
+}
+
+.past-report {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #ece8de;
+}
+
+.past-report:last-child {
+  border-bottom: 0;
+}
+
+.past-report span {
+  color: #7a7f86;
+  font-size: 13px;
+}
+
+@media (max-width: 760px) {
+  .parent-page {
+    padding: 20px 14px 40px;
+  }
+
+  .parent-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .parent-header h1 {
+    font-size: 24px;
+  }
+
+  .report-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .past-report {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

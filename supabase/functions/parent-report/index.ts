@@ -4,7 +4,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -27,13 +27,22 @@ Deno.serve(async (request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  if (request.method !== "POST") {
-    return json({ error: "Method not allowed" }, 405);
-  }
+  if (request.method !== "GET" && request.method !== "POST") {
+  return json({ error: "Method not allowed" }, 405);
+}
 
-  try {
-    const body = await request.json().catch(() => null);
-    const childId = body?.child_id;
+try {
+  const url = new URL(request.url);
+
+  const body =
+    request.method === "POST"
+      ? await request.json().catch(() => null)
+      : null;
+
+  const childId =
+    request.method === "GET"
+      ? url.searchParams.get("child_id")
+      : body?.child_id;
 
     if (!isUuid(childId)) {
       return json({ error: "有効な child_id が必要です" }, 400);
@@ -62,6 +71,39 @@ Deno.serve(async (request) => {
       .single();
 
     if (childError) throw childError;
+
+// GETの場合は、保存済みの保護者レポート一覧を返す
+if (request.method === "GET") {
+  const { data: reports, error: reportsError } = await supabase
+    .from("parent_reports")
+    .select(
+      "id, child_id, analysis_id, content, status, created_at, updated_at",
+    )
+    .eq("child_id", childId)
+    .order("created_at", { ascending: false });
+
+  if (reportsError) throw reportsError;
+
+  const parsedReports = (reports ?? []).map((report) => {
+    let parsedContent: unknown = report.content;
+
+    try {
+      parsedContent = JSON.parse(report.content);
+    } catch {
+      // JSONでなければ元の文字列をそのまま返す
+    }
+
+    return {
+      ...report,
+      content: parsedContent,
+    };
+  });
+
+  return json({
+    child,
+    reports: parsedReports,
+  });
+}
 
     // 最新ミッション
     const { data: latestSession, error: sessionError } = await supabase

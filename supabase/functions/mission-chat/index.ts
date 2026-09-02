@@ -105,9 +105,8 @@ Deno.serve(async (request) => {
           systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
           contents,
           generationConfig: {
-            temperature: 0.7,
             maxOutputTokens: 200,
-            thinkingConfig: { thinkingBudget: 0 },
+  	      thinkingConfig: { thinkingLevel: "minimal" },
           },
         }),
       },

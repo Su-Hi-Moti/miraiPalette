@@ -7,6 +7,7 @@ function ParentReport({ onBack }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [updating, setUpdating] = useState(false)
 
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -41,6 +42,55 @@ function ParentReport({ onBack }) {
     loadReports()
   }, [supabaseUrl, supabaseAnonKey])
 
+const updateLatestReport = async () => {
+  setUpdating(true)
+  setError('')
+
+  try {
+    // 最新データから保護者レポートを作り直す
+    const updateResponse = await fetch(
+      `${supabaseUrl}/functions/v1/parent-report`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ child_id: CHILD_ID }),
+      },
+    )
+
+    const updateResult = await updateResponse.json()
+
+    if (!updateResponse.ok) {
+      throw new Error(updateResult.error || '最新の内容に更新できませんでした')
+    }
+
+    // 作り直した最新レポート一覧を取得
+    const reloadResponse = await fetch(
+      `${supabaseUrl}/functions/v1/parent-report?child_id=${CHILD_ID}`,
+      {
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${supabaseAnonKey}`,
+        },
+      },
+    )
+
+    const reloadResult = await reloadResponse.json()
+
+    if (!reloadResponse.ok) {
+      throw new Error(reloadResult.error || 'レポートを再取得できませんでした')
+    }
+
+    setData(reloadResult)
+  } catch (updateError) {
+    setError(updateError.message)
+  } finally {
+    setUpdating(false)
+  }
+}
   if (loading) {
     return <main className="parent-page">レポートを読み込んでいます...</main>
   }
@@ -62,9 +112,19 @@ function ParentReport({ onBack }) {
           <p>{data?.child?.grade}年生</p>
         </div>
 
-        <button type="button" onClick={onBack}>
-          子ども画面へ
-        </button>
+        <div className="parent-header-actions">
+  <button
+    type="button"
+    onClick={updateLatestReport}
+    disabled={updating}
+  >
+    {updating ? '更新しています...' : '最新の内容に更新'}
+  </button>
+
+  <button type="button" onClick={onBack}>
+    子ども画面へ
+  </button>
+</div>
       </header>
 
       {!report ? (

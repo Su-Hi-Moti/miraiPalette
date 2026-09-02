@@ -129,3 +129,12 @@
     gap: 4px;
   }
 }
+.parent-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.parent-header-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

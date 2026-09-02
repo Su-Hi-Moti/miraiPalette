@@ -3,6 +3,7 @@ import './App.css'
 
 const initialMessages = [{ id: 'welcome', role: 'assistant', content: 'こんにちは！きょうのミッションについて、いっしょに考えよう。まず、どんな橋を作ってみたい？' }]
 const demoReplies = ['いい考えだね！どうしてそう思ったの？', 'なるほど。どの部分から試してみたい？', 'おもしろそう！強くするために、どんな形が使えそう？', 'その考えを、小さく試すとしたら何ができるかな？']
+const createMessageId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 function App() {
   const [messages, setMessages] = useState(initialMessages)
@@ -27,7 +28,7 @@ function App() {
     event.preventDefault()
     const message = input.trim()
     if (!message || isSending) return
-    setMessages((current) => [...current, { id: crypto.randomUUID(), role: 'user', content: message }])
+    setMessages((current) => [...current, { id: createMessageId(), role: 'user', content: message }])
     setInput(''); setError(''); setIsSending(true)
     try {
       let reply
@@ -44,7 +45,7 @@ function App() {
         if (!response.ok) throw new Error(data.error || 'AIとの通信に失敗しました')
         reply = data.message
       }
-      setMessages((current) => [...current, { id: crypto.randomUUID(), role: 'assistant', content: reply }])
+      setMessages((current) => [...current, { id: createMessageId(), role: 'assistant', content: reply }])
     } catch (sendError) { setError(sendError.message) } finally { setIsSending(false) }
   }
 

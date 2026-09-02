@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import FacilitatorView from './FacilitatorView'
 import './App.css'
 
 const initialMessages = [{ id: 'welcome', role: 'assistant', content: 'こんにちは！きょうのミッションについて、いっしょに考えよう。まず、どんな橋を作ってみたい？' }]
@@ -6,6 +7,7 @@ const demoReplies = ['いい考えだね！どうしてそう思ったの？', '
 const createMessageId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
 function App() {
+  const [appMode, setAppMode] = useState('child')
   const [screen, setScreen] = useState('chat')
   const [messages, setMessages] = useState(initialMessages)
   const [input, setInput] = useState('')
@@ -102,11 +104,14 @@ function App() {
     } catch (submitError) { setReflectionError(submitError.message) } finally { setIsGenerating(false) }
   }
 
+  if (appMode === 'facilitator') return <FacilitatorView onBack={() => setAppMode('child')} />
+
   return (
     <main className="app-shell">
       <header className="topbar">
         <a className="brand" href="/" aria-label="ミライパレット ホーム"><span className="brand-mark">M</span><span>ミライパレット</span></a>
         <div className="profile">
+          <button className="admin-link" type="button" onClick={() => setAppMode('facilitator')}>運営画面</button>
           <span className={`mode-badge ${isDemo ? 'demo' : ''}`}><span className="status-dot" />{isDemo ? 'デモモード' : 'AI接続中'}</span>
           <span className="avatar">た</span><span className="profile-name">デモ太郎</span>
         </div>

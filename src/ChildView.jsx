@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from './lib/supabase'
+import miraiPaletteIcon from './assets/mirai-palette-logo.png'
+import miraiRobotIcon from './assets/mirai-robot.png'
 import './App.css'
 
 const initialMessages = [
@@ -16,6 +18,12 @@ const demoReplies = [
   'なるほど。どの部分から試してみたい？',
   'おもしろそう！強くするために、どんな形が使えそう？',
   'その考えを、小さく試すとしたら何ができるかな？',
+]
+
+const suggestions = [
+  'ヒントをちょうだい',
+  'もっと簡単に説明して',
+  'クイズを出して',
 ]
 
 const createMessageId = () =>
@@ -107,13 +115,7 @@ function ChildView() {
     return () => {
       ignore = true
     }
-  }, [
-    screen,
-    isDemo,
-    sessionId,
-    supabaseUrl,
-    getApiHeaders,
-  ])
+  }, [screen, isDemo, sessionId, supabaseUrl, getApiHeaders])
 
   const getDemoReply = (message) => {
     if (message.includes('三角')) {
@@ -243,158 +245,182 @@ function ChildView() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <a
-          className="brand"
-          href="/"
-          aria-label="ミライパレット ホーム"
-        >
-          <span className="brand-mark">M</span>
-          <span>ミライパレット</span>
-        </a>
+        <div className="topbar-inner">
+          <a
+            className="brand"
+            href="/"
+            aria-label="ミライパレット ホーム"
+          >
+            <img
+              className="brand-mark"
+              src={miraiPaletteIcon}
+              alt=""
+            />
+            <span>ミライパレット</span>
+          </a>
 
-        <div className="profile">
-          <span className={`mode-badge ${isDemo ? 'demo' : ''}`}>
-            <span className="status-dot" />
-            {isDemo ? 'デモモード' : 'AI接続中'}
-          </span>
+          <div className="profile">
+            <span className={`mode-badge ${isDemo ? 'demo' : ''}`}>
+              <span className="status-dot" />
+              {isDemo ? 'デモ表示' : '接続中'}
+            </span>
 
-          <span className="avatar">た</span>
-          <span className="profile-name">デモ太郎</span>
+            <span className="avatar">た</span>
+            <span className="profile-name">デモ太郎</span>
+          </div>
         </div>
       </header>
 
-      <section
-        className="mission-strip"
-        aria-label="今日のミッション"
-      >
-        <div className="mission-icon">橋</div>
-
-        <div>
-          <p className="eyebrow">TODAY&apos;S MISSION</p>
-          <h1>強い橋を作ろう</h1>
-          <p>どうしたら、少ない材料でも強い橋になるかな？</p>
-        </div>
-
-        <div className="step-chip">
-          {screen === 'chat' ? 'STEP 2 / 3' : 'STEP 3 / 3'}
-        </div>
-      </section>
-
       {screen === 'chat' ? (
-        <section className="chat-panel">
-          <div className="chat-heading">
-            <div>
-              <p className="eyebrow">AI THINKING PARTNER</p>
-              <h2>いっしょに考えてみよう</h2>
-            </div>
+        <div className="learning-workspace">
+          <div className="main-column">
+            <section className="chat-panel retro-window">
+              <div className="window-bar blue">
+                <div>
+                  <span className="online-dot" />
+                  ミライ学習アシスタント
+                </div>
+                <span className="window-controls">－ □ ×</span>
+              </div>
 
-            <div className="heading-actions">
-              <p className="helper">
-                正解はひとつじゃないよ。思ったことを自由に話してね。
-              </p>
+              <div className="chat-heading">
+                <div>
+                  <p className="section-label">今日のミッション</p>
+                  <h1>強い橋を作ろう</h1>
+                </div>
 
-              <button
-                className="reflection-link"
-                type="button"
-                onClick={() => setScreen('reflection')}
-              >
-                振り返りへ <span>→</span>
-              </button>
-            </div>
-          </div>
+                <button
+                  className="reflection-link"
+                  type="button"
+                  onClick={() => setScreen('reflection')}
+                >
+                  振り返り →
+                </button>
+              </div>
 
-          <div className="messages" aria-live="polite">
-            {messages.map((message) => (
-              <article
-                key={message.id}
-                className={`message-row ${message.role}`}
-              >
-                {message.role === 'assistant' && (
-                  <div className="ai-avatar">M</div>
+              <div className="messages" aria-live="polite">
+                {messages.map((message) => (
+                  <article
+                    key={message.id}
+                    className={`message-row ${message.role}`}
+                  >
+                    {message.role === 'assistant' && (
+                      <img
+                        className="ai-avatar"
+                        src={miraiRobotIcon}
+                        alt=""
+                      />
+                    )}
+
+                    <div className="message-copy">
+                      <p className="speaker">
+                        {message.role === 'assistant'
+                          ? 'ミライ'
+                          : 'あなた'}
+                      </p>
+
+                      <div className="bubble">
+                        {message.content}
+                      </div>
+                    </div>
+
+                    {message.role === 'user' && (
+                      <span
+                        className="user-avatar"
+                        aria-hidden="true"
+                      >
+                        ☺
+                      </span>
+                    )}
+                  </article>
+                ))}
+
+                {isSending && (
+                  <article className="message-row assistant">
+                    <img
+                      className="ai-avatar"
+                      src={miraiRobotIcon}
+                      alt=""
+                    />
+
+                    <div className="message-copy">
+                      <p className="speaker">ミライ</p>
+
+                      <div
+                        className="bubble typing"
+                        aria-label="考え中"
+                      >
+                        <i />
+                        <i />
+                        <i />
+                      </div>
+                    </div>
+                  </article>
                 )}
 
-                <div>
-                  <p className="speaker">
-                    {message.role === 'assistant'
-                      ? 'ミライ'
-                      : 'あなた'}
-                  </p>
+                <div ref={messagesEndRef} />
+              </div>
 
-                  <div className="bubble">
-                    {message.content}
-                  </div>
-                </div>
-              </article>
-            ))}
+              <form
+                className="composer"
+                onSubmit={sendMessage}
+              >
+                {error && (
+                  <p className="error-message">{error}</p>
+                )}
 
-            {isSending && (
-              <article className="message-row assistant">
-                <div className="ai-avatar">M</div>
+                <div className="input-row">
+                  <textarea
+                    value={input}
+                    onChange={(event) =>
+                      setInput(event.target.value)
+                    }
+                    onKeyDown={(event) => {
+                      if (
+                        event.key === 'Enter' &&
+                        !event.shiftKey
+                      ) {
+                        event.preventDefault()
+                        event.currentTarget.form?.requestSubmit()
+                      }
+                    }}
+                    placeholder="メッセージを入力"
+                    aria-label="メッセージ"
+                    rows="1"
+                    maxLength="2000"
+                  />
 
-                <div>
-                  <p className="speaker">ミライ</p>
-
-                  <div
-                    className="bubble typing"
-                    aria-label="考え中"
+                  <button
+                    type="submit"
+                    disabled={!input.trim() || isSending}
+                    aria-label="送信する"
                   >
-                    <i />
-                    <i />
-                    <i />
-                  </div>
+                    ➤
+                  </button>
                 </div>
-              </article>
-            )}
 
-            <div ref={messagesEndRef} />
+                <div className="suggestions">
+                  {suggestions.map((suggestion) => (
+                    <button
+                      type="button"
+                      key={suggestion}
+                      onClick={() => setInput(suggestion)}
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+      ) : (
+        <section className="reflection-panel retro-window">
+          <div className="window-bar coral">
+            <strong>振り返り</strong>
+            <span className="window-controls">－ □ ×</span>
           </div>
 
-          <form
-            className="composer"
-            onSubmit={sendMessage}
-          >
-            {error && (
-              <p className="error-message">{error}</p>
-            )}
-
-            <div className="input-row">
-              <textarea
-                value={input}
-                onChange={(event) =>
-                  setInput(event.target.value)
-                }
-                onKeyDown={(event) => {
-                  if (
-                    event.key === 'Enter' &&
-                    !event.shiftKey
-                  ) {
-                    event.preventDefault()
-                    event.currentTarget.form?.requestSubmit()
-                  }
-                }}
-                placeholder="考えていることを入力してね…"
-                aria-label="メッセージ"
-                rows="1"
-                maxLength="2000"
-              />
-
-              <button
-                type="submit"
-                disabled={!input.trim() || isSending}
-                aria-label="送信する"
-              >
-                <span>送る</span>
-                <span>→</span>
-              </button>
-            </div>
-
-            <p className="input-hint">
-              Enterで送信 ・ Shift + Enterで改行
-            </p>
-          </form>
-        </section>
-      ) : (
-        <section className="reflection-panel">
           <div className="reflection-heading">
             <button
               className="back-button"
@@ -404,9 +430,8 @@ function ChildView() {
               ← 会話に戻る
             </button>
 
-            <p className="eyebrow">MY REFLECTION</p>
+            <p className="section-label">振り返り</p>
             <h2>今日のことを振り返ろう</h2>
-
             <p>
               うまく書こうとしなくて大丈夫。感じたことを自分の言葉で教えてね。
             </p>
@@ -418,12 +443,7 @@ function ChildView() {
             </div>
           ) : finding ? (
             <div className="finding-view">
-              <div className="finding-mark">✦</div>
-
-              <p className="eyebrow">
-                TODAY&apos;S DISCOVERY
-              </p>
-
+              <p className="section-label">まとめ</p>
               <h2>今回の発見</h2>
 
               <p className="finding-text">
@@ -518,8 +538,7 @@ function ChildView() {
               >
                 {isGenerating
                   ? 'ミライが整理しています…'
-                  : '今回の発見を見る'}{' '}
-                <span>✦</span>
+                  : '今回の発見を見る'}
               </button>
             </form>
           )}

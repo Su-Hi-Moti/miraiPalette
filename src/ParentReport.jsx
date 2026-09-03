@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { useAuth } from './useAuth'
 import './ParentReport.css'
 
-const CHILD_ID = 'd5cdb109-8ec6-4d8d-a1af-67b457f3ec04'
+function ParentReport() {
+  const { linkedChildId, session } = useAuth()
 
-function ParentReport({ onBack }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -12,23 +13,36 @@ function ParentReport({ onBack }) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
   const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+  const getApiHeaders = useCallback(
+    () => ({
+      'Content-Type': 'application/json',
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${session?.access_token ?? ''}`,
+    }),
+    [supabaseAnonKey, session?.access_token],
+  )
+
   useEffect(() => {
+    if (!linkedChildId) return
+
     const loadReports = async () => {
+      setLoading(true)
+      setError('')
+
       try {
         const response = await fetch(
-          `${supabaseUrl}/functions/v1/parent-report?child_id=${CHILD_ID}`,
+          `${supabaseUrl}/functions/v1/parent-report?child_id=${linkedChildId}`,
           {
-            headers: {
-              apikey: supabaseAnonKey,
-              Authorization: `Bearer ${supabaseAnonKey}`,
-            },
+            headers: getApiHeaders(),
           },
         )
 
         const result = await response.json()
 
         if (!response.ok) {
-          throw new Error(result.error || 'レポートを取得できませんでした')
+          throw new Error(
+            result.error || 'レポートを取得できませんでした',
+          )
         }
 
         setData(result)
@@ -40,63 +54,81 @@ function ParentReport({ onBack }) {
     }
 
     loadReports()
-  }, [supabaseUrl, supabaseAnonKey])
+  }, [linkedChildId, supabaseUrl, getApiHeaders])
 
-const updateLatestReport = async () => {
-  setUpdating(true)
-  setError('')
+  const updateLatestReport = async () => {
+    if (!linkedChildId) return
 
-  try {
-    // 最新データから保護者レポートを作り直す
-    const updateResponse = await fetch(
-      `${supabaseUrl}/functions/v1/parent-report`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: supabaseAnonKey,
-          Authorization: `Bearer ${supabaseAnonKey}`,
+    setUpdating(true)
+    setError('')
+
+    try {
+      const updateResponse = await fetch(
+        `${supabaseUrl}/functions/v1/parent-report`,
+        {
+          method: 'POST',
+          headers: getApiHeaders(),
+          body: JSON.stringify({
+            child_id: linkedChildId,
+          }),
         },
-        body: JSON.stringify({ child_id: CHILD_ID }),
-      },
-    )
+      )
 
-    const updateResult = await updateResponse.json()
+      const updateResult = await updateResponse.json()
 
-    if (!updateResponse.ok) {
-      throw new Error(updateResult.error || '最新の内容に更新できませんでした')
-    }
+      if (!updateResponse.ok) {
+        throw new Error(
+          updateResult.error ||
+            '最新の内容に更新できませんでした',
+        )
+      }
 
-    // 作り直した最新レポート一覧を取得
-    const reloadResponse = await fetch(
-      `${supabaseUrl}/functions/v1/parent-report?child_id=${CHILD_ID}`,
-      {
-        headers: {
-          apikey: supabaseAnonKey,
-          Authorization: `Bearer ${supabaseAnonKey}`,
+      const reloadResponse = await fetch(
+        `${supabaseUrl}/functions/v1/parent-report?child_id=${linkedChildId}`,
+        {
+          headers: getApiHeaders(),
         },
-      },
-    )
+      )
 
-    const reloadResult = await reloadResponse.json()
+      const reloadResult = await reloadResponse.json()
 
-    if (!reloadResponse.ok) {
-      throw new Error(reloadResult.error || 'レポートを再取得できませんでした')
+      if (!reloadResponse.ok) {
+        throw new Error(
+          reloadResult.error ||
+            'レポートを再取得できませんでした',
+        )
+      }
+
+      setData(reloadResult)
+    } catch (updateError) {
+      setError(updateError.message)
+    } finally {
+      setUpdating(false)
     }
-
-    setData(reloadResult)
-  } catch (updateError) {
-    setError(updateError.message)
-  } finally {
-    setUpdating(false)
   }
-}
+
+  if (!linkedChildId) {
+    return (
+      <main className="parent-page">
+        エラー: 紐づいている子どもの情報がありません
+      </main>
+    )
+  }
+
   if (loading) {
-    return <main className="parent-page">レポートを読み込んでいます...</main>
+    return (
+      <main className="parent-page">
+        レポートを読み込んでいます...
+      </main>
+    )
   }
 
   if (error) {
-    return <main className="parent-page">エラー: {error}</main>
+    return (
+      <main className="parent-page">
+        エラー: {error}
+      </main>
+    )
   }
 
   const reports = data?.reports ?? []
@@ -107,24 +139,28 @@ const updateLatestReport = async () => {
     <main className="parent-page">
       <header className="parent-header">
         <div>
-          <p className="parent-eyebrow">PARENT REPORT</p>
-          <h1>{data?.child?.name}さんの活動レポート</h1>
+          <p className="parent-eyebrow">
+            PARENT REPORT
+          </p>
+
+          <h1>
+            {data?.child?.name}さんの活動レポート
+          </h1>
+
           <p>{data?.child?.grade}年生</p>
         </div>
 
         <div className="parent-header-actions">
-  <button
-    type="button"
-    onClick={updateLatestReport}
-    disabled={updating}
-  >
-    {updating ? '更新しています...' : '最新の内容に更新'}
-  </button>
-
-  <button type="button" onClick={onBack}>
-    子ども画面へ
-  </button>
-</div>
+          <button
+            type="button"
+            onClick={updateLatestReport}
+            disabled={updating}
+          >
+            {updating
+              ? '更新しています...'
+              : '最新の内容に更新'}
+          </button>
+        </div>
       </header>
 
       {!report ? (
@@ -134,7 +170,10 @@ const updateLatestReport = async () => {
       ) : (
         <>
           <section className="report-card report-hero">
-            <p className="parent-eyebrow">LATEST ACTIVITY</p>
+            <p className="parent-eyebrow">
+              LATEST ACTIVITY
+            </p>
+
             <h2>{report.title}</h2>
             <p>{report.summary}</p>
           </section>
@@ -163,6 +202,7 @@ const updateLatestReport = async () => {
 
           <section className="report-card">
             <h3>継続して見えていること</h3>
+
             <ul>
               {report.continuing_patterns?.map((item) => (
                 <li key={item}>{item}</li>
@@ -172,6 +212,7 @@ const updateLatestReport = async () => {
 
           <section className="report-card">
             <h3>最近の変化</h3>
+
             <ul>
               {report.recent_changes?.map((item) => (
                 <li key={item}>{item}</li>
@@ -181,6 +222,7 @@ const updateLatestReport = async () => {
 
           <section className="report-card">
             <h3>次に試してみたい体験</h3>
+
             <ul>
               {report.next_experiences?.map((item) => (
                 <li key={item}>{item}</li>
@@ -189,7 +231,9 @@ const updateLatestReport = async () => {
           </section>
 
           <section className="report-card conversation-card">
-            <h3>おうちでこんな会話をしてみませんか？</h3>
+            <h3>
+              おうちでこんな会話をしてみませんか？
+            </h3>
 
             {report.parent_child_conversation?.map((item) => (
               <p key={item}>「{item}」</p>
@@ -200,10 +244,19 @@ const updateLatestReport = async () => {
             <h3>これまでのレポート</h3>
 
             {reports.map((savedReport) => (
-              <div className="past-report" key={savedReport.id}>
-                <strong>{savedReport.content?.title ?? '活動レポート'}</strong>
+              <div
+                className="past-report"
+                key={savedReport.id}
+              >
+                <strong>
+                  {savedReport.content?.title ??
+                    '活動レポート'}
+                </strong>
+
                 <span>
-                  {new Date(savedReport.created_at).toLocaleDateString('ja-JP')}
+                  {new Date(
+                    savedReport.created_at,
+                  ).toLocaleDateString('ja-JP')}
                 </span>
               </div>
             ))}

@@ -48,20 +48,66 @@ try {
       return json({ error: "有効な child_id が必要です" }, 400);
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
+   const supabaseUrl = Deno.env.get("SUPABASE_URL");
+const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
 
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error("Supabase environment variables are missing");
-    }
+if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey) {
+  throw new Error("Supabase environment variables are missing");
+}
 
-    if (!geminiApiKey) {
-      throw new Error("Gemini API key is not configured");
-    }
+if (!geminiApiKey) {
+  throw new Error("Gemini API key is not configured");
+}
 
-    // service_role は Edge Function 内部だけで使用する
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
+// ログイン中ユーザーを確認する
+const authorization = request.headers.get("Authorization");
+
+if (!authorization) {
+  return json({ error: "ログインが必要です" }, 401);
+}
+
+const accessToken = authorization.replace(/^Bearer\s+/i, "");
+
+const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+  global: {
+    headers: {
+      Authorization: authorization,
+    },
+  },
+});
+
+const {
+  data: { user },
+  error: authError,
+} = await authClient.auth.getUser(accessToken);
+
+if (authError || !user) {
+  return json({ error: "ログイン情報を確認できませんでした" }, 401);
+}
+
+// profiles から本人のroleと紐づく子どもを取得する
+const { data: profile, error: profileError } = await authClient
+  .from("profiles")
+  .select("role, child_id")
+  .eq("id", user.id)
+  .single();
+
+if (profileError || !profile) {
+  return json({ error: "権限情報を確認できませんでした" }, 403);
+}
+
+if (profile.role !== "parent") {
+  return json({ error: "保護者のみ利用できます" }, 403);
+}
+
+if (profile.child_id !== childId) {
+  return json({ error: "この子どものレポートにはアクセスできません" }, 403);
+}
+
+// 本人確認が終わってから service_role を使う
+const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // 子ども情報
     const { data: child, error: childError } = await supabase

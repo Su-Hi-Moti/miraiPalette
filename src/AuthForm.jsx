@@ -8,6 +8,16 @@ const roleOptions = [
   ['facilitator', '運営者'],
 ]
 
+const authErrorMessages = {
+  'Invalid login credentials': 'メールアドレスかパスワードが違います。',
+  'Email not confirmed': 'メールアドレスの確認が完了していません。',
+  'User already registered': 'このメールアドレスはすでに登録されています。',
+  'email rate limit exceeded': 'メール送信回数の上限に達しました。少し時間を置いてお試しください。',
+}
+
+const getAuthErrorMessage = (error) =>
+  authErrorMessages[error?.message] || '処理を完了できませんでした。入力内容を確認して、もう一度お試しください。'
+
 export default function AuthForm({ onAuthenticated }) {
   const [mode, setMode] = useState('sign-in')
   const [displayName, setDisplayName] = useState('')
@@ -65,7 +75,7 @@ export default function AuthForm({ onAuthenticated }) {
       : await signInWithPassword({ email, password })
 
     if (result.error) {
-      setError(result.error.message)
+      setError(getAuthErrorMessage(result.error))
     } else if (mode === 'sign-up' && !result.data.session) {
       setMessage('確認メールを送信しました。メールのリンクから登録を完了してください。')
     } else {
@@ -84,7 +94,7 @@ export default function AuthForm({ onAuthenticated }) {
         <label>名前<input value={displayName} onChange={(event) => setDisplayName(event.target.value)} autoComplete="name" maxLength="80" /></label>
         <label>利用者区分<select value={role} onChange={(event) => { setRole(event.target.value); setChildId('') }}>{roleOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         {role === 'parent' && <label>お子さま<select value={childId} onChange={(event) => setChildId(event.target.value)} disabled={childrenLoading || Boolean(childrenError)} required><option value="">{childrenLoading ? '読み込み中…' : '選択してください'}</option>{children.map((child) => <option key={child.id} value={child.id}>{child.name}（小学{child.grade}年生）</option>)}</select></label>}
-        {childrenError && role === 'parent' && <p className="auth-error" role="alert">お子さま一覧を取得できませんでした: {childrenError}</p>}
+        {childrenError && role === 'parent' && <p className="auth-error" role="alert">お子さまの一覧を読み込めませんでした。時間を置いてもう一度お試しください。</p>}
       </>}
       <label>メールアドレス<input type="email" value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" required /></label>
       <label>パスワード<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'} minLength="8" required /></label>

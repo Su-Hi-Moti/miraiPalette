@@ -3,7 +3,7 @@ import { useAuth } from './useAuth'
 import './LoginPage.css'
 
 export default function LoginPage() {
-  const { session, user, profile, role, profileError, isLoading, isAuthenticated, signOut } = useAuth()
+  const { session, user, profile, role, linkedChildId, profileError, isLoading, isAuthenticated, signOut } = useAuth()
 
   const handleAuthenticated = () => {
     window.location.assign('/')
@@ -27,6 +27,7 @@ export default function LoginPage() {
             <div><dt>メール</dt><dd>{user.email || '未設定'}</dd></div>
             <div><dt>ユーザーID</dt><dd>{user.id}</dd></div>
             <div><dt>ロール</dt><dd>{role || '未設定'}</dd></div>
+            {role === 'parent' && <div><dt>子どもID</dt><dd>{linkedChildId || '未設定'}</dd></div>}
             <div><dt>セッション</dt><dd>{session ? '有効' : 'なし'}</dd></div>
           </dl>
           {profileError && <p className="auth-error" role="alert">ロール情報を取得できませんでした: {profileError}</p>}

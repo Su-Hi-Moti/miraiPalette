@@ -1,10 +1,19 @@
 import { supabase } from './supabase'
 
-export async function signUp({ email, password, displayName }) {
+const accountRoles = new Set(['parent', 'child', 'facilitator'])
+
+export async function signUp({ email, password, displayName, role, childId }) {
+  const accountRole = accountRoles.has(role) ? role : 'parent'
   return supabase.auth.signUp({
     email: email.trim(),
     password,
-    options: { data: { display_name: displayName?.trim() ?? '' } },
+    options: {
+      data: {
+        display_name: displayName?.trim() ?? '',
+        role: accountRole,
+        child_id: accountRole === 'parent' ? childId || null : null,
+      },
+    },
   })
 }
 

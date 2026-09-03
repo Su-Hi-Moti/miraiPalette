@@ -11,7 +11,7 @@ const parseReflection = (content) => {
 
 const formatDate = (value) => value ? new Intl.DateTimeFormat('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value)) : '日時未設定'
 
-export default function FacilitatorView({ onBack }) {
+export default function FacilitatorView() {
   const [children, setChildren] = useState([])
   const [selectedChildId, setSelectedChildId] = useState('')
   const [records, setRecords] = useState([])
@@ -90,7 +90,7 @@ export default function FacilitatorView({ onBack }) {
   }
 
   return <main className="facilitator-shell">
-    <header className="facilitator-topbar"><div className="facilitator-brand"><span>M</span><div><small>FACILITATOR</small><strong>ミライパレット 運営</strong></div></div><button type="button" onClick={onBack}>子ども画面へ</button></header>
+    <header className="facilitator-topbar"><div className="facilitator-brand"><span>M</span><div><small>FACILITATOR</small><strong>ミライパレット 運営</strong></div></div></header>
     <div className="facilitator-layout">
       <aside className="children-sidebar"><p className="facilitator-eyebrow">CHILDREN</p><h1>子ども一覧</h1>{children.map((child) => <button type="button" key={child.id} className={child.id === selectedChildId ? 'selected' : ''} onClick={() => setSelectedChildId(child.id)}><span>{child.name.slice(0, 1)}</span><div><strong>{child.name}</strong><small>小学{child.grade}年生</small></div></button>)}</aside>
       <section className="history-area">

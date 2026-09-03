@@ -3,7 +3,7 @@ import './ParentReport.css'
 
 const CHILD_ID = 'd5cdb109-8ec6-4d8d-a1af-67b457f3ec04'
 
-function ParentReport({ onBack }) {
+function ParentReport() {
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
@@ -121,10 +121,7 @@ const updateLatestReport = async () => {
     {updating ? '更新しています...' : '最新の内容に更新'}
   </button>
 
-  <button type="button" onClick={onBack}>
-    子ども画面へ
-  </button>
-</div>
+  </div>
       </header>
 
       {!report ? (

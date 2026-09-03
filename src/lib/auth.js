@@ -23,7 +23,7 @@ export function getProfile(userId) {
   if (!userId) return Promise.resolve({ data: null, error: null })
   return supabase
     .from('profiles')
-    .select('id, role, display_name, created_at, updated_at')
+    .select('id, role')
     .eq('id', userId)
     .maybeSingle()
 }

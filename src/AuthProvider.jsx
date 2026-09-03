@@ -21,9 +21,10 @@ export function AuthProvider({ children }) {
       }
       const { data, error } = await getProfile(user.id)
       if (!mounted) return
-      const metadataRole = user.user_metadata?.role ?? null
-      setProfile(data || (metadataRole ? { id: user.id, role: metadataRole } : null))
-      setProfileError(data || metadataRole ? '' : error?.message ?? '')
+      setProfile(data || null)
+setProfileError(
+  error?.message ?? (data ? '' : 'プロフィールが登録されていません')
+)
     }
 
     const initialize = async () => {
@@ -56,8 +57,8 @@ export function AuthProvider({ children }) {
     session,
     user: session?.user ?? null,
     profile,
-    role: profile?.role ?? session?.user?.user_metadata?.role ?? null,
-    linkedChildId: session?.user?.user_metadata?.child_id ?? null,
+    role: profile?.role ?? null,
+    linkedChildId: profile?.child_id ?? null,
     profileError,
     isLoading,
     isAuthenticated: Boolean(session?.user),

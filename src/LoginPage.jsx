@@ -46,7 +46,7 @@ export default function LoginPage() {
       <section className="login-card">
         <p className="login-eyebrow">MIRAI PALETTE</p>
         <h1>ログイン</h1>
-        <p className="login-description">アカウントを作成するか、登録済みのメールアドレスでログインしてください。</p>
+        <p className="login-description">登録済みのメールアドレスでログインしてください。</p>
         <AuthForm onAuthenticated={handleAuthenticated} />
       </section>
     </main>

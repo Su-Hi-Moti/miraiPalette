@@ -32,7 +32,7 @@ export function getProfile(userId) {
   if (!userId) return Promise.resolve({ data: null, error: null })
   return supabase
     .from('profiles')
-    .select('id, role')
+   .select('id, role, child_id')
     .eq('id', userId)
     .maybeSingle()
 }

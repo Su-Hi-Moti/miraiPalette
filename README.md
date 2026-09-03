@@ -5,6 +5,7 @@ Product For Gabaithon
 
 Supabase Authを使ったアカウント登録・ログイン・セッション管理を実装しています。
 
+- `/login`: 認証画面（未ログイン時は登録／ログイン、ログイン後はセッション・`user.id`・`profiles.role`を表示）
 - `src/AuthForm.jsx`: メールアドレス＋パスワードの登録／ログインフォーム
 - `src/AuthProvider.jsx`: Authセッションの初期化と変更監視
 - `src/useAuth.js`: 画面側から認証状態を読むHook

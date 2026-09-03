@@ -19,6 +19,15 @@ export function signOut() {
   return supabase.auth.signOut()
 }
 
+export function getProfile(userId) {
+  if (!userId) return Promise.resolve({ data: null, error: null })
+  return supabase
+    .from('profiles')
+    .select('id, role, display_name, created_at, updated_at')
+    .eq('id', userId)
+    .maybeSingle()
+}
+
 export function subscribeToAuth(callback) {
   return supabase.auth.onAuthStateChange(callback)
 }

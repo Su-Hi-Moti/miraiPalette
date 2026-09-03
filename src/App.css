@@ -9,7 +9,6 @@
   --yellow: #e8b84a;
   --muted: #766d62;
 }
-
 button,
 input,
 textarea { font-family: inherit; }
@@ -67,6 +66,40 @@ button { color: var(--ink); }
 .profile-name { font-weight: 700; }
 
 .learning-workspace { width: min(960px, calc(100% - 44px)); margin: 18px auto 0; }
+.mission-overview { width: min(1080px, calc(100% - 44px)); margin: 18px auto 30px; }
+.mission-state { padding: 11px 20px; border-bottom: 1px dashed var(--line); background: #d9e7e6; font-size: 10px; }
+.mission-error { margin: 16px 31px 0; padding: 11px 13px; display: grid; gap: 4px; border: 1px solid #9d3e31; color: #7e3027; background: #f5d6c9; font-size: 9px; }
+.mission-error strong { font-size: 10px; }
+.mission-hero { padding: 28px 31px 24px; display: grid; grid-template-columns: 78px minmax(0, 1fr) auto; align-items: center; gap: 20px; }
+.month-stamp { width: 72px; height: 72px; display: grid; place-items: center; align-content: center; border: 1.5px solid var(--line); background: var(--yellow); box-shadow: 3px 3px 0 rgba(70,59,48,.17); transform: rotate(-2deg); }
+.month-stamp span { font-size: 21px; font-weight: 900; line-height: 1; }
+.month-stamp strong { margin-top: 5px; font-size: 9px; letter-spacing: .2em; }
+.mission-hero h1 { margin: 0 0 7px; font-size: clamp(22px, 3vw, 34px); letter-spacing: .04em; }
+.mission-hero p:last-child { max-width: 610px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.month-progress { min-width: 92px; padding-left: 17px; border-left: 1px dashed var(--line); text-align: center; }
+.month-progress strong { display: block; font-size: 20px; }
+.month-progress span { font-size: 9px; }
+.month-progress-line { height: 20px; margin: 0 31px 20px; padding: 3px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; border: 1px solid var(--line); background: var(--paper-light); }
+.month-progress-line i { background: #ded7c7; }
+.month-progress-line i.completed { background: var(--coral); }
+.week-grid { padding: 0 31px 27px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.week-card { min-width: 0; min-height: 205px; padding: 14px; display: flex; flex-direction: column; align-items: flex-start; border: 1.5px solid var(--line); background: var(--paper-light); text-align: left; box-shadow: 3px 3px 0 rgba(70,59,48,.13); transition: transform .12s, box-shadow .12s; }
+.week-card:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 rgba(70,59,48,.16); }
+.week-card:disabled { cursor: wait; }
+.week-card.done { background: #dfe9dc; }
+.week-card.current { background: #f2cf79; }
+.week-card.upcoming { color: #71695f; }
+.week-number { padding-bottom: 8px; font-size: 11px; font-weight: 900; }
+.week-status { margin-bottom: 18px; padding: 4px 6px; border: 1px solid currentColor; font-size: 8px; }
+.week-card strong { font-size: 13px; line-height: 1.55; }
+.week-card small { margin-top: 7px; color: var(--muted); font-size: 9px; line-height: 1.55; }
+.week-open { margin-top: auto; padding-top: 16px; align-self: flex-end; font-size: 9px; font-weight: 800; }
+.current-mission-callout { margin: 0 31px 30px; padding: 14px 15px 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border: 1.5px solid var(--line); background: #d9e7e6; box-shadow: 3px 3px 0 rgba(70,59,48,.13); }
+.current-mission-callout div { display: grid; gap: 4px; }
+.current-mission-callout span { color: #4b777e; font-size: 9px; font-weight: 800; }
+.current-mission-callout strong { font-size: 13px; }
+.current-mission-callout button { padding: 9px 13px; border: 1px solid var(--line); background: var(--coral); font-size: 10px; font-weight: 800; box-shadow: 2px 2px 0 rgba(70,59,48,.16); }
+.current-mission-callout button:disabled { cursor: wait; opacity: .65; }
 .retro-window {
   overflow: hidden;
   border: 1.5px solid var(--line);
@@ -88,6 +121,8 @@ button { color: var(--ink); }
 .chat-heading { padding: 14px 18px 12px; display: flex; align-items: end; justify-content: space-between; gap: 15px; border-bottom: 1px solid rgba(85,73,63,.55); }
 .section-label { margin: 0 0 4px; color: #4b777e; font-size: 9px; font-weight: 800; }
 .chat-heading h1 { margin: 0; font-size: 18px; letter-spacing: .04em; }
+.chat-actions { display: flex; align-items: center; gap: 7px; }
+.overview-link { padding: 7px 10px; border: 1px solid var(--line); background: var(--paper-light); font-size: 9px; font-weight: 700; box-shadow: 2px 2px 0 rgba(72,59,48,.12); }
 .reflection-link { padding: 7px 11px; border: 1px solid var(--line); background: #f3cd73; font-size: 9px; font-weight: 700; box-shadow: 2px 2px 0 rgba(72,59,48,.15); }
 .messages { padding: 22px 26px; overflow-y: auto; scrollbar-color: #85796c #e4d9c1; scrollbar-width: thin; }
 .message-row { max-width: 74%; margin-bottom: 22px; display: flex; gap: 9px; align-items: flex-start; animation: appear .2s steps(2, end); }
@@ -157,10 +192,22 @@ button { color: var(--ink); }
   .brand-mark { width: 32px; height: 32px; }
   .profile-name, .mode-badge, .admin-link, .parent-report-button { display: none; }
   .learning-workspace { width: calc(100% - 20px); margin-top: 12px; }
+  .mission-overview { width: calc(100% - 20px); margin: 12px auto 20px; }
+  .mission-hero { padding: 20px; grid-template-columns: 58px 1fr; gap: 13px; }
+  .month-stamp { width: 55px; height: 55px; }
+  .month-stamp span { font-size: 16px; }
+  .mission-hero h1 { font-size: 21px; }
+  .mission-hero p:last-child { font-size: 10px; }
+  .month-progress { display: none; }
+  .month-progress-line { margin: 0 20px 16px; }
+  .week-grid { padding: 0 20px 20px; grid-template-columns: repeat(2, 1fr); }
+  .week-card { min-height: 165px; }
+  .current-mission-callout { margin: 0 20px 22px; }
   .chat-panel { height: calc(100vh - 86px); min-height: 520px; }
   .chat-heading { padding: 11px 12px; }
   .chat-heading h1 { font-size: 15px; }
   .reflection-link { padding: 6px 8px; }
+  .overview-link { padding: 6px 8px; }
   .messages { padding: 17px 13px; }
   .message-row { max-width: 90%; margin-bottom: 17px; }
   .bubble { padding: 10px 11px; font-size: 11px; }
@@ -176,6 +223,19 @@ button { color: var(--ink); }
 
 @media (max-width: 430px) {
   .learning-workspace { width: 100%; margin-top: 0; }
+  .mission-overview { width: 100%; margin: 0; border-right: 0; border-left: 0; border-radius: 0; box-shadow: none; }
+  .mission-hero { padding: 17px 14px; }
+  .mission-hero h1 { font-size: 18px; }
+  .mission-hero p:last-child { display: none; }
+  .month-progress-line { margin: 0 14px 14px; }
+  .week-grid { padding: 0 14px 16px; grid-template-columns: 1fr; gap: 8px; }
+  .week-card { min-height: 0; padding: 11px 12px; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; }
+  .week-number { padding: 0; }
+  .week-status { margin: 0; justify-self: end; }
+  .week-card strong, .week-card small { grid-column: 1 / -1; }
+  .week-open { grid-column: 1 / -1; padding-top: 9px; }
+  .current-mission-callout { margin: 0 14px 18px; padding: 12px; }
+  .current-mission-callout button { flex: 0 0 auto; padding: 8px; }
   .topbar { padding: 0; }
   .topbar-inner { min-height: 58px; border-top: 0; border-right: 0; border-left: 0; border-radius: 0; box-shadow: none; }
   .topbar-inner::before { height: 4px; }
